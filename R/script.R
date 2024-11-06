@@ -1,4 +1,4 @@
-## Trying to simulate and define the probability of mating events and store them in an object, following specific parameters 
+## Trying to simulate and define the probability of mating events and store them in an object, following specific parameters
 
 info<-read.csv("mock-parents.csv")
 nind=nrow(info)
@@ -9,56 +9,62 @@ nloci=ncol(info)-1
 fparents <- info$tree_id
 mparents <- info$tree_id
 
-# create a cross-table with all possible mating combinations - initial values missing (NA)
+# 1 ----------------------------------------------------------------------------
 
-mating_all <- matrix(NA, nind+1, nind+1)
-mating_all[1,2:(nind+1)]<-fparents
-mating_all[2:(nind+1),1]<-mparents
-mating_all[1,1]<-"random"
+# # create a cross-table with all possible mating combinations - initial values missing (NA)
+#
+# mating_all <- matrix(NA, nind+1, nind+1)
+# mating_all[1,2:(nind+1)]<-fparents
+# mating_all[2:(nind+1),1]<-mparents
+# mating_all[1,1]<-"random"
+#
+# ## random mating (including selfing)
+# # if chosen, all values in the mating_all matrix must be 1, thus equal probabilities for all mating combinations
+#
+# mating_all[2:(nind+1),2:(nind+1)] = 1
+# x<-as.data.frame(mating_all)
+#
+# ## random mating (excluding selfing)
+# # if chosen, selfing is not allowed (probability 0) and all other combinations are random (probability 1)
+#
+# mating_all[1,1]<-"random_no_selfing"
+# mating_all[2:(nind+1),2:(nind+1)] = 1
+# x<-as.data.frame(mating_all)
+# for (i in 1:nind) {
+#     if (x[i+1,1] == x[1,i+1]){
+#         x[i+1,i+1]<-0
+#     }
+# }
+#
+# ## complete selfing
+# # if chosen, only sef-mating is allowed, thus same partner has probability 1 and all other combinations 0
+#
+# mating_all[1,1]<-"selfing"
+# mating_all[2:(nind+1),2:(nind+1)] = 0
+# x<-as.data.frame(mating_all)
+# for (i in 1:nind) {
+#     if (x[i+1,1] == x[1,i+1]){
+#         x[i+1,i+1]<-1
+#     }
+# }
 
-## random mating (including selfing)
-# if chosen, all values in the mating_all matrix must be 1, thus equal probabilities for all mating combinations
+# 2 ----------------------------------------------------------------------------
 
-mating_all[2:(nind+1),2:(nind+1)] = 1
-x<-as.data.frame(mating_all)
+# ## mixed mating
+# # if chosen, user defines an inbreeding index s and an outcrossing index t (t+s=1). All non selfed mating events are random
+#
+# s<-0.3
+# t<-1-s
+# mating_all[1,1]<-"mixed"
+# mating_all[2:(nind+1),2:(nind+1)] = t
+# x<-as.data.frame(mating_all)
+# for (i in 1:nind) {
+#     if (x[i+1,1] == x[1,i+1]){
+#         x[i+1,i+1]<-s
+#     }
+# }
 
-## random mating (excluding selfing)
-# if chosen, selfing is not allowed (probability 0) and all other combinations are random (probability 1)
-
-mating_all[1,1]<-"random_no_selfing"
-mating_all[2:(nind+1),2:(nind+1)] = 1
-x<-as.data.frame(mating_all)
-for (i in 1:nind) {
-    if (x[i+1,1] == x[1,i+1]){
-        x[i+1,i+1]<-0
-    } 
-}
-
-## complete selfing
-# if chosen, only sef-mating is allowed, thus same partner has probability 1 and all other combinations 0
-
-mating_all[1,1]<-"selfing"
-mating_all[2:(nind+1),2:(nind+1)] = 0
-x<-as.data.frame(mating_all)
-for (i in 1:nind) {
-    if (x[i+1,1] == x[1,i+1]){
-        x[i+1,i+1]<-1
-    } 
-}
-
-## mixed mating
-# if chosen, user defines an inbreeding index s and an outcrossing index t (t+s=1). All non selfed mating events are random
-
-s<-0.3
-t<-1-s
-mating_all[1,1]<-"mixed"
-mating_all[2:(nind+1),2:(nind+1)] = t
-x<-as.data.frame(mating_all)
-for (i in 1:nind) {
-    if (x[i+1,1] == x[1,i+1]){
-        x[i+1,i+1]<-s
-    } 
-}
+# 3 ----------------------------------------------------------------------------
 
 ## structured data in populations
 # individuals must be divided in groups, here called populations
@@ -76,40 +82,42 @@ pop[401:500] = "mock5"
 popf <- pop
 popm <- pop
 
-## complete population structure - no gene flow 
-# if chosen, only individuals from the same population may mate, thus same population has probability 1 and all other combinations 0
-
-mating_all[1,1]<-"structured"
-mating_all[2:(nind+1),2:(nind+1)] = 0
-x<-as.data.frame(mating_all)
-for (j in 1:nind) {
-    for (i in 1:nind) {
-        if (popf[i] == popm[j]){
-            x[i+1,j+1]<-1
-        } else if (popf[j] == popm[i]){
-            x[i+1,j+1]<-1
-        }
-    }
-}
-
-## partial population structure with gene flow 
-# if chosen, user defines a gene flow rate (m) among populations.
-
-m <- 0.05
-mating_all[1,1]<-"partial structure"
-mating_all[2:(nind+1),2:(nind+1)] = m
-x<-as.data.frame(mating_all)
-for (j in 1:nind) 
-{
-    for (i in 1:nind) 
-    {
-        if (popf[i] == popm[j]){
-            x[i+1,j+1]<-1-m
-        } else if (popf[j] == popm[i]){
-            x[i+1,j+1]<-1-m
-        }
-    }
-}
+# ## complete population structure - no gene flow
+# # if chosen, only individuals from the same population may mate, thus same population has probability 1 and all other combinations 0
+#
+# mating_all[1,1]<-"structured"
+# mating_all[2:(nind+1),2:(nind+1)] = 0
+# x<-as.data.frame(mating_all)
+#
+# for (j in 1:nind) {
+#     for (i in 1:nind) {
+#         if (popf[i] == popm[j]){
+#             x[i+1,j+1]<-1
+#         } else if (popf[j] == popm[i]){
+#             x[i+1,j+1]<-1
+#         }
+#     }
+# }
+#
+# ## partial population structure with gene flow
+# # if chosen, user defines a gene flow rate (m) among populations.
+#
+# m <- 0.05
+# mating_all[1,1]<-"partial structure"
+# mating_all[2:(nind+1),2:(nind+1)] = m
+# x<-as.data.frame(mating_all)
+#
+# for (j in 1:nind)
+# {
+#     for (i in 1:nind)
+#     {
+#         if (popf[i] == popm[j]){
+#             x[i+1,j+1]<-1-m
+#         } else if (popf[j] == popm[i]){
+#             x[i+1,j+1]<-1-m
+#         }
+#     }
+# }
 
 ## Isolation by distance - IBD
 # Genetic data often have geographical coordinates for each individual sampled. We will use real data from hop plants in Greece
@@ -118,7 +126,7 @@ info<-read.csv("hop.csv")
 nind=nrow(info)
 nloci=ncol(info)-1
 
-# Defining arrays with male and female parents (we consider individuals as hermaphrodites, but in the actual case of hop, this is completely false, as hop is dioecious and only female plants were harvested. 
+# Defining arrays with male and female parents (we consider individuals as hermaphrodites, but in the actual case of hop, this is completely false, as hop is dioecious and only female plants were harvested.
 
 fparents <- info$plant
 mparents <- info$plant
@@ -161,7 +169,7 @@ x<-as.data.frame(mating_all)
 for (i in 1:nind) {
     if (x[i+1,1] == x[1,i+1]){
         x[i+1,i+1]<-0
-    } 
+    }
 }
 
 ## IBD - linear with limit
@@ -175,11 +183,11 @@ mating_all[2:(nind+1),2:(nind+1)]<-sim
 mating_all[1,1]<-"IBD_Limit_no_selfing"
 x<-as.data.frame(mating_all)
 
-for (i in 1:nind) 
+for (i in 1:nind)
 {
     if (x[i+1,1] == x[1,i+1]){
         x[i+1,i+1]<-0
-    } 
+    }
 }
 
 
@@ -215,44 +223,44 @@ info<-read.csv("mock-parents.csv")
 ## Start the function "offspring)
 
 offspring <- function(info, fparents=nrow(info), mparents=nrow(info), prog=nrow(info)) {
-    
+
     # Size of parents dataset
     nind=nrow(info)
     nloci=ncol(info)-1
     cat("The parents dataset contains", nind, "individuals and", nloci, "loci.", "\n")
-    
+
     cat("Number of female parents:", fparents, "\n")
     cat("Number of male parents:", mparents, "\n")
     cat("Number of progeny produced:", prog, "\n")
-    
+
     # define datasets with female and male parents for this mating season
     f1<-info %>% sample_n(fparents, replace = FALSE)
     m1<-info %>% sample_n(mparents, replace = FALSE)
-    
+
     # Creating *prog* random mating events (pairs of trees). Each mating event should result in one offspring. Participating parents will be randomly chosen from the defined parent datasets respectively
-    
+
     f<-f1 %>% sample_n(prog, replace = TRUE)
     m<-m1 %>% sample_n(prog, replace = TRUE)
-    
+
     cat("Number of mating female parents:", length(unique(f[,1])), "\n")
     cat("Number of mating male parents:", length(unique(m[,1])), "\n")
-    
+
     mating_events <- data.frame(female = f[,1], male = m[,1])
     # mating_events
     mating_combinations <- table(f$tree_id, m$tree_id)
     # mating_combinations
-    
-    # For each mating event, one multilocus gamete must be produced from each parent. With nloci loci, there are 2^nloci possible combinations for each gamete to occure. From each locus, one of the two gametes will be randomly selected. 
-    
+
+    # For each mating event, one multilocus gamete must be produced from each parent. With nloci loci, there are 2^nloci possible combinations for each gamete to occure. From each locus, one of the two gametes will be randomly selected.
+
     # Female gametes: First we prepare an empty matrix
     fgametes <- matrix(NA, prog, nloci)
-    
+
     # Start a loop for all female gametes
     for(j in 1:prog)
     {
         # Start a loop to define the multi-locus female gamete of one individual
         for(i in 1:nloci)
-        { 
+        {
             geno <- f[j,i+1]
             alleles <- unlist(strsplit(geno, split = "/"))
             gamete <- sample(alleles,1)
@@ -260,16 +268,16 @@ offspring <- function(info, fparents=nrow(info), mparents=nrow(info), prog=nrow(
             fgametes[j,i] <- gamete
         }
     }
-    
+
     # Male gametes: First we prepare an empty matrix
     mgametes <- matrix(NA, prog, nloci)
-    
+
     # Start a loop for all female gametes
     for(j in 1:prog)
     {
         # Start a loop to define the multi-locus female gamete of one individual
         for(i in 1:nloci)
-        { 
+        {
             geno <- m[j,i+1]
             alleles <- unlist(strsplit(geno, split = "/"))
             gamete <- sample(alleles,1)
@@ -277,20 +285,20 @@ offspring <- function(info, fparents=nrow(info), mparents=nrow(info), prog=nrow(
             mgametes[j,i] <- gamete
         }
     }
-    
+
     # Merge two datasets into one progeny file
     progeny <<- matrix(NA, prog, nloci+1)
     colnames(progeny) <<- colnames(info)
-    
+
     # Write tree names
-    for (i in 1:prog) 
+    for (i in 1:prog)
     {
         progeny[i,1] <<- paste("tree", i, sep = "_")
     }
-    
+
     # Create the progeny genotype file
     progeny[,2:(nloci+1)] <<- paste(fgametes[,1:nloci], mgametes[,1:nloci], sep = "/")
-    
+
 }
 
 # export the progeny dataset as .csv

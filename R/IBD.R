@@ -1,18 +1,24 @@
 
 
-IBD <- function() {
+IBD <- function(parents, metadata, coord_cols = c("longitude", "latitude")) {
 
-    ## Isolation by distance - IBD
-    # Genetic data often have geographical coordinates for each individual sampled. We will use real data from hop plants in Greece
 
-    info<-read.csv("hop.csv")
-    nind=nrow(info)
-    nloci=ncol(info)-1
+    t <- parents[[1]] |> combn(2)
 
-    # Defining arrays with male and female parents (we consider individuals as hermaphrodites, but in the actual case of hop, this is completely false, as hop is dioecious and only female plants were harvested.
+    ppairs <- data.table(
+        "parent1" = c(parents[[1]], t[1, ]),
+        "parent2" = c(parents[[1]], t[2, ])
+    )
 
-    fparents <- info$plant
-    mparents <- info$plant
+    ppairs <- ppairs[order(parent1, parent2)]
+
+    colnames(ppairs) <- c("parent1", "parent2")
+
+    dist <- distm(t, fun = distGeo)
+
+
+
+
 
     # create a cross-table with all possible mating combinations - initial values missing (NA)
 

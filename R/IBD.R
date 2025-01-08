@@ -1,5 +1,21 @@
 
 
+#' Title
+#'
+#' @param parents data.table
+#' @param coord data.table
+#' @param coord_cols character vector
+#' @param selfing logical
+#' @param limit numeric
+#'
+#' @return data.table
+#' @export
+#'
+#' @importFrom geosphere distm
+#' @importFrom geosphere distGeo
+#' @importFrom data.table setDT
+#' @importFrom data.table melt
+#' @importFrom data.table fifelse
 IBD <- function(parents, coord, coord_cols = c("longitude", "latitude"), selfing = FALSE, limit = -1) {
 
 

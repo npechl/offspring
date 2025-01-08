@@ -1,4 +1,16 @@
 
+#' Title
+#'
+#' @param parents data.table
+#' @param mating character
+#' @param selfing logical
+#'
+#' @return data.table
+#' @export
+#'
+#' @importFrom utils combn
+#' @importFrom data.table data.table
+#' @importFrom data.table fifelse
 random_mating <- function(parents, mating = "random", selfing = TRUE) {
 
     t <- parents[[1]] |> combn(2)

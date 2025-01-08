@@ -1,6 +1,19 @@
 
 
 
+#' Title
+#'
+#' @param parents data.table
+#' @param structure data.table
+#' @param complete logical
+#' @param gene_flow_rate numeric
+#'
+#' @return data.table
+#' @export
+#'
+#' @importFrom utils combn
+#' @importFrom data.table data.table
+#' @importFrom data.table fifelse
 population <- function(parents, structure, complete = TRUE, gene_flow_rate = .05) {
 
 
